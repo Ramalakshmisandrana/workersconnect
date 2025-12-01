@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - WorkersConnect{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <nav class="navbar navbar-expand-lg dashboard-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">WorkersConnect</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item me-3">
+                        <span class="text-muted">Welcome, {{ current_user.full_name }}</span>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-logout" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="dashboard-content">
+        <div class="welcome-card">
+            <h1 class="welcome-title">Find Workers Near You</h1>
+            <p class="welcome-subtitle">Connect with skilled professionals in your area instantly</p>
+            
+            <div class="action-buttons">
+                <button class="btn-action" id="useLocationBtn">
+                    <i class="fas fa-location-crosshairs"></i>
+                    <span id="locationBtnText">Use My Location</span>
+                </button>
+                <a href="{{ url_for('search', lat=17.385, lon=78.486) }}" class="btn-action">
+                    <i class="fas fa-users"></i>
+                    Show All Nearby Workers
+                </a>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                        <h5>Search Workers</h5>
+                        <p class="text-muted small">Find skilled professionals near your location</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <i class="fas fa-phone fa-3x text-success mb-3"></i>
+                        <h5>Direct Call</h5>
+                        <p class="text-muted small">Call workers directly, no middleman involved</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                        <h5>Trusted Workers</h5>
+                        <p class="text-muted small">All workers are rated and reviewed</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('useLocationBtn').addEventListener('click', function() {
+        const btn = this;
+        const btnText = document.getElementById('locationBtnText');
+        
+        if ("geolocation" in navigator) {
+            btnText.innerHTML = '<span class="spinner"></span> Getting location...';
+            btn.disabled = true;
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    window.location.href = `/search?lat=${lat}&lon=${lon}`;
+                },
+                function(error) {
+                    btnText.textContent = 'Use My Location';
+                    btn.disabled = false;
+                    
+                    let message = 'Unable to get your location. ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            message += 'Please allow location access.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            message += 'Location information unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            message += 'Request timed out.';
+                            break;
+                    }
+                    alert(message);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            alert('Geolocation is not supported by your browser');
+        }
+    });
+</script>
+{% endblock %}

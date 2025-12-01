@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}WorkersConnect - Find Trusted Local Workers Instantly{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{{ url_for('index') }}">WorkersConnect</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav align-items-center">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-register" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-register" href="{{ url_for('register') }}">Register</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="hero-section">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            Find Trusted Local<br>Workers <span class="accent">Instantly</span>
+        </h1>
+        <p class="hero-subtitle">
+            Connect with skilled professionals like electricians, plumbers, and more in your neighborhood. No middlemen, no commissions.
+        </p>
+        <div class="hero-buttons">
+            <a href="{{ url_for('register') }}" class="btn-get-started">Get Started</a>
+            <a href="{{ url_for('login') }}" class="btn-login-hero">Login</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

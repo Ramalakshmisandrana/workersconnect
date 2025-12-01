@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Search Workers - WorkersConnect{% endblock %}
+
+{% block content %}
+<div class="search-container">
+    <nav class="navbar navbar-expand-lg dashboard-navbar fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">WorkersConnect</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item me-2">
+                            <a class="nav-link" href="{{ url_for('dashboard') }}">
+                                <i class="fas fa-arrow-left me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-logout" href="{{ url_for('logout') }}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-register" href="{{ url_for('register') }}">Register</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="search-header">
+        <h1 class="search-title">Available Workers Near You</h1>
+        <p class="search-subtitle">
+            {% if workers %}
+                Found {{ workers|length }} skilled worker{{ 's' if workers|length != 1 else '' }} within 10 km
+            {% else %}
+                No workers available in this area
+            {% endif %}
+        </p>
+    </div>
+    
+    {% if workers %}
+        <div class="workers-grid">
+            {% for worker, distance in workers %}
+                <div class="worker-card">
+                    <div class="worker-avatar">
+                        {{ worker.full_name[0].upper() }}
+                    </div>
+                    
+                    <h3 class="worker-name">{{ worker.full_name }}</h3>
+                    
+                    <div class="worker-skills">
+                        {% for skill in worker.get_skills_list()[:3] %}
+                            <span class="skill-tag">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="worker-info">
+                        <div class="info-item">
+                            <i class="fas fa-briefcase"></i>
+                            <span>{{ worker.experience }} yrs exp</span>
+                        </div>
+                        <div class="info-item rating-stars">
+                            {% for i in range(5) %}
+                                {% if i < worker.rating|int %}
+                                    <i class="fas fa-star"></i>
+                                {% elif i < worker.rating %}
+                                    <i class="fas fa-star-half-alt"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="text-muted ms-1">({{ "%.1f"|format(worker.rating) }})</span>
+                        </div>
+                    </div>
+                    
+                    <div class="distance-badge">
+                        <i class="fas fa-map-marker-alt"></i>
+                        {{ "%.1f"|format(distance) }} km away
+                    </div>
+                    
+                    <a href="tel:{{ worker.phone }}" class="btn-call">
+                        <i class="fas fa-phone"></i>
+                        <span>Call Now</span>
+                        <span class="phone-number">{{ worker.phone }}</span>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-results">
+            <i class="fas fa-search"></i>
+            <h3>No Workers Found</h3>
+            <p>There are no available workers in this area. Try searching in a different location.</p>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-3">
+                <i class="fas fa-arrow-left me-2"></i>Go Back
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

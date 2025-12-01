@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Register - WorkersConnect{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <h1 class="auth-title">Create Account</h1>
+        <p class="auth-subtitle">Join WorkersConnect today</p>
+        
+        <form method="POST" action="{{ url_for('register') }}" id="registerForm">
+            <div class="mb-3">
+                <label for="full_name" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="full_name" name="full_name" required placeholder="Enter your full name">
+            </div>
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" required placeholder="your@email.com">
+            </div>
+            
+            <div class="mb-3">
+                <label for="phone" class="form-label">Phone Number</label>
+                <div class="input-group">
+                    <span class="input-group-text">+91</span>
+                    <input type="tel" class="form-control" id="phone" name="phone" required placeholder="9876543210" pattern="[0-9]{10}" maxlength="10">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required placeholder="Create a password" minlength="3">
+            </div>
+            
+            <div class="mb-3">
+                <label for="role" class="form-label">I am a</label>
+                <select class="form-select" id="role" name="role" required>
+                    <option value="">Select your role</option>
+                    <option value="customer">Customer (Looking for workers)</option>
+                    <option value="worker">Worker (Providing services)</option>
+                </select>
+            </div>
+            
+            <div class="mb-3" id="skillsContainer" style="display: none;">
+                <label for="skills" class="form-label">Your Skills</label>
+                <input type="text" class="form-control" id="skills" name="skills" placeholder="e.g., Electrician, Plumber, Carpenter">
+                <div class="form-text">Enter skills separated by commas</div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-user-plus me-2"></i>Create Account
+            </button>
+        </form>
+        
+        <p class="auth-link">
+            Already have an account? <a href="{{ url_for('login') }}">Login here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('role').addEventListener('change', function() {
+        const skillsContainer = document.getElementById('skillsContainer');
+        if (this.value === 'worker') {
+            skillsContainer.style.display = 'block';
+        } else {
+            skillsContainer.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - WorkersConnect{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <nav class="navbar navbar-expand-lg dashboard-navbar">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{{ url_for('index') }}">WorkersConnect</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item me-2">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-logout" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="profile-container">
+        <div class="profile-card">
+            <h1 class="profile-title"><i class="fas fa-user-edit me-2"></i>Edit Your Profile</h1>
+            
+            <form method="POST" action="{{ url_for('profile') }}">
+                <div class="mb-3">
+                    <label for="skills" class="form-label">Your Skills</label>
+                    <input type="text" class="form-control" id="skills" name="skills" 
+                           value="{{ current_user.skills or '' }}" 
+                           placeholder="e.g., Electrician, Plumber, Carpenter">
+                    <div class="form-text">Enter your skills separated by commas</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="experience" class="form-label">Years of Experience</label>
+                    <input type="number" class="form-control" id="experience" name="experience" 
+                           value="{{ current_user.experience }}" min="0" max="50">
+                </div>
+                
+                <div class="availability-toggle">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="is_available" name="is_available"
+                               {% if current_user.is_available %}checked{% endif %}>
+                        <label class="form-check-label" for="is_available">
+                            <strong id="availabilityText">
+                                {% if current_user.is_available %}Available for work{% else %}Currently busy{% endif %}
+                            </strong>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="latitude" class="form-label">Latitude</label>
+                    <input type="number" step="any" class="form-control" id="latitude" name="latitude" 
+                           value="{{ current_user.latitude or '' }}" placeholder="e.g., 17.3850">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="longitude" class="form-label">Longitude</label>
+                    <input type="number" step="any" class="form-control" id="longitude" name="longitude" 
+                           value="{{ current_user.longitude or '' }}" placeholder="e.g., 78.4867">
+                    <p class="location-help">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Find your coordinates at <a href="https://www.latlong.net/" target="_blank">latlong.net</a>
+                        or click the button below to use your current location.
+                    </p>
+                </div>
+                
+                <button type="button" class="btn btn-location w-100 mb-3" id="getLocationBtn">
+                    <i class="fas fa-location-crosshairs me-2"></i>
+                    <span id="locationBtnText">Get My Current Location</span>
+                </button>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>Save Profile
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('is_available').addEventListener('change', function() {
+        const text = document.getElementById('availabilityText');
+        text.textContent = this.checked ? 'Available for work' : 'Currently busy';
+    });
+    
+    document.getElementById('getLocationBtn').addEventListener('click', function() {
+        const btn = this;
+        const btnText = document.getElementById('locationBtnText');
+        
+        if ("geolocation" in navigator) {
+            btnText.innerHTML = '<span class="spinner"></span> Getting location...';
+            btn.disabled = true;
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
+                    document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
+                    btnText.innerHTML = '<i class="fas fa-check me-1"></i> Location Updated!';
+                    setTimeout(() => {
+                        btnText.textContent = 'Get My Current Location';
+                        btn.disabled = false;
+                    }, 2000);
+                },
+                function(error) {
+                    btnText.textContent = 'Get My Current Location';
+                    btn.disabled = false;
+                    alert('Unable to get your location. Please enter coordinates manually.');
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        } else {
+            alert('Geolocation is not supported by your browser');
+        }
+    });
+</script>
+{% endblock %}
