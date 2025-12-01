@@ -230,6 +230,7 @@ def profile():
 def search():
     lat = request.args.get('lat', type=float)
     lon = request.args.get('lon', type=float)
+    skill_filter = request.args.get('skill', '').strip()
     
     # Default to Hyderabad if no coordinates provided
     if lat is None or lon is None:
@@ -238,21 +239,30 @@ def search():
     # Get all available workers
     workers = User.query.filter_by(role='worker', is_available=True).all()
     
-    # Calculate distance and filter workers within 10km
+    # Filter by skill if provided
+    if skill_filter:
+        workers = [w for w in workers if w.skills and skill_filter.lower() in w.skills.lower()]
+    
+    # Calculate distance for all workers
     workers_with_distance = []
     for worker in workers:
         if worker.latitude and worker.longitude:
             distance = worker.distance_from(lat, lon)
-            if distance <= 10:  # Within 10 km
-                workers_with_distance.append((worker, distance))
+            workers_with_distance.append((worker, distance))
+        else:
+            # Workers without location get a default distance
+            workers_with_distance.append((worker, None))
     
-    # Sort by ranking score (higher is better)
+    # Sort by ranking score (higher is better), workers with distance first
     workers_with_distance.sort(
-        key=lambda x: x[0].ranking_score(x[1]),
-        reverse=True
+        key=lambda x: (x[1] is None, -x[0].ranking_score(x[1] if x[1] is not None else 10)),
     )
     
-    return render_template('search.html', workers=workers_with_distance)
+    return render_template('search.html', 
+                         workers=workers_with_distance, 
+                         skill_filter=skill_filter,
+                         lat=lat,
+                         lon=lon)
 
 # Initialize database and create demo data
 with app.app_context():

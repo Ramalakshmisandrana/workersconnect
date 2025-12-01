@@ -35,22 +35,67 @@
     </nav>
     
     <div class="search-header">
-        <h1 class="search-title">Available Workers Near You</h1>
+        <h1 class="search-title">
+            {% if skill_filter %}
+                {{ skill_filter }}s Near You
+            {% else %}
+                Available Workers Near You
+            {% endif %}
+        </h1>
         <p class="search-subtitle">
             {% if workers %}
-                Found {{ workers|length }} skilled worker{{ 's' if workers|length != 1 else '' }} within 10 km
+                Found {{ workers|length }} skilled worker{{ 's' if workers|length != 1 else '' }}
+                {% if skill_filter %} for "{{ skill_filter }}"{% endif %}
             {% else %}
-                No workers available in this area
+                No workers available
+                {% if skill_filter %} for "{{ skill_filter }}"{% endif %}
             {% endif %}
         </p>
+        
+        <div class="filter-bar">
+            <form method="GET" action="{{ url_for('search') }}" class="filter-form">
+                <input type="hidden" name="lat" value="{{ lat }}">
+                <input type="hidden" name="lon" value="{{ lon }}">
+                <select name="skill" class="filter-select" onchange="this.form.submit()">
+                    <option value="">All Services</option>
+                    <option value="Electrician" {% if skill_filter == 'Electrician' %}selected{% endif %}>Electrician</option>
+                    <option value="Plumber" {% if skill_filter == 'Plumber' %}selected{% endif %}>Plumber</option>
+                    <option value="Carpenter" {% if skill_filter == 'Carpenter' %}selected{% endif %}>Carpenter</option>
+                    <option value="Painter" {% if skill_filter == 'Painter' %}selected{% endif %}>Painter</option>
+                    <option value="AC Technician" {% if skill_filter == 'AC Technician' %}selected{% endif %}>AC Technician</option>
+                    <option value="Welder" {% if skill_filter == 'Welder' %}selected{% endif %}>Welder</option>
+                    <option value="Mason" {% if skill_filter == 'Mason' %}selected{% endif %}>Mason</option>
+                    <option value="Mobile Repair" {% if skill_filter == 'Mobile Repair' %}selected{% endif %}>Mobile Repair</option>
+                    <option value="CCTV Installation" {% if skill_filter == 'CCTV Installation' %}selected{% endif %}>CCTV Installation</option>
+                    <option value="RO Service" {% if skill_filter == 'RO Service' %}selected{% endif %}>RO Service</option>
+                    <option value="Pest Control" {% if skill_filter == 'Pest Control' %}selected{% endif %}>Pest Control</option>
+                    <option value="Maid" {% if skill_filter == 'Maid' %}selected{% endif %}>Maid</option>
+                    <option value="Driver" {% if skill_filter == 'Driver' %}selected{% endif %}>Driver</option>
+                    <option value="Beautician" {% if skill_filter == 'Beautician' %}selected{% endif %}>Beautician</option>
+                    <option value="Tailor" {% if skill_filter == 'Tailor' %}selected{% endif %}>Tailor</option>
+                    <option value="Cook" {% if skill_filter == 'Cook' %}selected{% endif %}>Cook</option>
+                    <option value="Gardener" {% if skill_filter == 'Gardener' %}selected{% endif %}>Gardener</option>
+                </select>
+                {% if skill_filter %}
+                    <a href="{{ url_for('search', lat=lat, lon=lon) }}" class="clear-filter">
+                        <i class="fas fa-times me-1"></i>Clear Filter
+                    </a>
+                {% endif %}
+            </form>
+        </div>
     </div>
     
     {% if workers %}
         <div class="workers-grid">
             {% for worker, distance in workers %}
-                <div class="worker-card">
-                    <div class="worker-avatar">
-                        {{ worker.full_name[0].upper() }}
+                <div class="worker-card" style="animation-delay: {{ loop.index0 * 0.1 }}s">
+                    <div class="worker-card-header">
+                        <div class="worker-avatar">
+                            {{ worker.full_name[0].upper() }}
+                        </div>
+                        <div class="availability-badge">
+                            <i class="fas fa-circle"></i> Available
+                        </div>
                     </div>
                     
                     <h3 class="worker-name">{{ worker.full_name }}</h3>
@@ -80,13 +125,15 @@
                         </div>
                     </div>
                     
+                    {% if distance is not none %}
                     <div class="distance-badge">
                         <i class="fas fa-map-marker-alt"></i>
                         {{ "%.1f"|format(distance) }} km away
                     </div>
+                    {% endif %}
                     
                     <a href="tel:{{ worker.phone }}" class="btn-call">
-                        <i class="fas fa-phone"></i>
+                        <i class="fas fa-phone-alt"></i>
                         <span>Call Now</span>
                         <span class="phone-number">{{ worker.phone }}</span>
                     </a>
@@ -95,12 +142,27 @@
         </div>
     {% else %}
         <div class="no-results">
-            <i class="fas fa-search"></i>
+            <div class="no-results-icon">
+                <i class="fas fa-search"></i>
+            </div>
             <h3>No Workers Found</h3>
-            <p>There are no available workers in this area. Try searching in a different location.</p>
-            <a href="{{ url_for('dashboard') }}" class="btn btn-primary mt-3">
-                <i class="fas fa-arrow-left me-2"></i>Go Back
-            </a>
+            <p>
+                {% if skill_filter %}
+                    There are no available {{ skill_filter }}s in this area. Try a different service or location.
+                {% else %}
+                    There are no available workers in this area. Try searching in a different location.
+                {% endif %}
+            </p>
+            <div class="no-results-actions">
+                {% if skill_filter %}
+                    <a href="{{ url_for('search', lat=lat, lon=lon) }}" class="btn btn-outline-primary me-2">
+                        <i class="fas fa-users me-2"></i>Show All Workers
+                    </a>
+                {% endif %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Go Back
+                </a>
+            </div>
         </div>
     {% endif %}
 </div>

@@ -30,44 +30,129 @@
             <h1 class="welcome-title">Find Workers Near You</h1>
             <p class="welcome-subtitle">Connect with skilled professionals in your area instantly</p>
             
+            <div class="search-box-container">
+                <form id="skillSearchForm" class="skill-search-form">
+                    <div class="search-input-group">
+                        <select id="skillSelect" class="skill-select" name="skill">
+                            <option value="">All Services</option>
+                            <option value="Electrician">Electrician</option>
+                            <option value="Plumber">Plumber</option>
+                            <option value="Carpenter">Carpenter</option>
+                            <option value="Painter">Painter</option>
+                            <option value="AC Technician">AC Technician</option>
+                            <option value="Welder">Welder</option>
+                            <option value="Mason">Mason</option>
+                            <option value="Mobile Repair">Mobile Repair</option>
+                            <option value="CCTV Installation">CCTV Installation</option>
+                            <option value="RO Service">RO Service</option>
+                            <option value="Pest Control">Pest Control</option>
+                            <option value="Maid">Maid</option>
+                            <option value="Driver">Driver</option>
+                            <option value="Beautician">Beautician</option>
+                            <option value="Tailor">Tailor</option>
+                            <option value="Cook">Cook</option>
+                            <option value="Gardener">Gardener</option>
+                        </select>
+                        <button type="submit" class="btn-search" id="searchBtn">
+                            <i class="fas fa-search me-2"></i>
+                            <span id="searchBtnText">Search Workers</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            
             <div class="action-buttons">
                 <button class="btn-action" id="useLocationBtn">
                     <i class="fas fa-location-crosshairs"></i>
                     <span id="locationBtnText">Use My Location</span>
                 </button>
-                <a href="{{ url_for('search', lat=17.385, lon=78.486) }}" class="btn-action">
+                <a href="{{ url_for('search') }}" class="btn-action">
                     <i class="fas fa-users"></i>
-                    Show All Nearby Workers
+                    Show All Workers
                 </a>
+            </div>
+        </div>
+        
+        <div class="skills-grid">
+            <h3 class="section-title"><i class="fas fa-tools me-2"></i>Browse by Service</h3>
+            <div class="row">
+                <div class="col-6 col-md-3 mb-3">
+                    <a href="{{ url_for('search', skill='Electrician') }}" class="skill-card">
+                        <i class="fas fa-bolt"></i>
+                        <span>Electrician</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3 mb-3">
+                    <a href="{{ url_for('search', skill='Plumber') }}" class="skill-card">
+                        <i class="fas fa-faucet"></i>
+                        <span>Plumber</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3 mb-3">
+                    <a href="{{ url_for('search', skill='Carpenter') }}" class="skill-card">
+                        <i class="fas fa-hammer"></i>
+                        <span>Carpenter</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3 mb-3">
+                    <a href="{{ url_for('search', skill='Painter') }}" class="skill-card">
+                        <i class="fas fa-paint-roller"></i>
+                        <span>Painter</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3 mb-3">
+                    <a href="{{ url_for('search', skill='AC Technician') }}" class="skill-card">
+                        <i class="fas fa-snowflake"></i>
+                        <span>AC Technician</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3 mb-3">
+                    <a href="{{ url_for('search', skill='Maid') }}" class="skill-card">
+                        <i class="fas fa-broom"></i>
+                        <span>Maid</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3 mb-3">
+                    <a href="{{ url_for('search', skill='Driver') }}" class="skill-card">
+                        <i class="fas fa-car"></i>
+                        <span>Driver</span>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3 mb-3">
+                    <a href="{{ url_for('search', skill='Beautician') }}" class="skill-card">
+                        <i class="fas fa-spa"></i>
+                        <span>Beautician</span>
+                    </a>
+                </div>
             </div>
         </div>
         
         <div class="row mt-4">
             <div class="col-md-4 mb-3">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body text-center p-4">
-                        <i class="fas fa-search fa-3x text-primary mb-3"></i>
-                        <h5>Search Workers</h5>
-                        <p class="text-muted small">Find skilled professionals near your location</p>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-search"></i>
                     </div>
+                    <h5>Search Workers</h5>
+                    <p>Find skilled professionals near your location</p>
                 </div>
             </div>
             <div class="col-md-4 mb-3">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body text-center p-4">
-                        <i class="fas fa-phone fa-3x text-success mb-3"></i>
-                        <h5>Direct Call</h5>
-                        <p class="text-muted small">Call workers directly, no middleman involved</p>
+                <div class="feature-card">
+                    <div class="feature-icon success">
+                        <i class="fas fa-phone"></i>
                     </div>
+                    <h5>Direct Call</h5>
+                    <p>Call workers directly, no middleman involved</p>
                 </div>
             </div>
             <div class="col-md-4 mb-3">
-                <div class="card h-100 border-0 shadow-sm">
-                    <div class="card-body text-center p-4">
-                        <i class="fas fa-star fa-3x text-warning mb-3"></i>
-                        <h5>Trusted Workers</h5>
-                        <p class="text-muted small">All workers are rated and reviewed</p>
+                <div class="feature-card">
+                    <div class="feature-icon warning">
+                        <i class="fas fa-star"></i>
                     </div>
+                    <h5>Trusted Workers</h5>
+                    <p>All workers are rated and reviewed</p>
                 </div>
             </div>
         </div>
@@ -77,6 +162,38 @@
 
 {% block scripts %}
 <script>
+    document.getElementById('skillSearchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const skill = document.getElementById('skillSelect').value;
+        const btn = document.getElementById('searchBtn');
+        const btnText = document.getElementById('searchBtnText');
+        
+        btnText.innerHTML = '<span class="spinner"></span> Searching...';
+        btn.disabled = true;
+        
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    let url = `/search?lat=${lat}&lon=${lon}`;
+                    if (skill) url += `&skill=${encodeURIComponent(skill)}`;
+                    window.location.href = url;
+                },
+                function(error) {
+                    let url = '/search';
+                    if (skill) url += `?skill=${encodeURIComponent(skill)}`;
+                    window.location.href = url;
+                },
+                { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+            );
+        } else {
+            let url = '/search';
+            if (skill) url += `?skill=${encodeURIComponent(skill)}`;
+            window.location.href = url;
+        }
+    });
+    
     document.getElementById('useLocationBtn').addEventListener('click', function() {
         const btn = this;
         const btnText = document.getElementById('locationBtnText');
