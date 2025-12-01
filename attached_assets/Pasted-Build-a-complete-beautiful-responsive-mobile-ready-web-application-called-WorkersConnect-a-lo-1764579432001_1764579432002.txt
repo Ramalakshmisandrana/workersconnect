@@ -1,0 +1,86 @@
+Build a complete, beautiful, responsive, mobile-ready web application called "WorkersConnect" – a location-based skilled worker finding platform for India.
+
+Core Purpose:
+Connect customers with local skilled workers (electricians, plumbers, carpenters, painters, AC technicians, maids, drivers, beauticians, etc.) within 5–50 km radius. Customers can instantly call workers directly from the browser (using tel: link). No middleman, no commission.
+
+Tech Stack (must use exactly this):
+
+Backend: Python Flask
+Database: SQLite (or MySQL)
+Frontend: Bootstrap 5 + custom modern CSS + Font Awesome icons
+Authentication: Flask-Login
+Distance calculation: Haversine formula
+User Roles:
+
+Customer (seeker)
+Worker (service provider)
+Features & Pages (must implement all):
+
+Homepage (/)
+
+Beautiful gradient hero section with tagline “Find Trusted Local Workers Instantly”
+Clear Register/Login buttons
+Modern, professional look (not basic)
+Register Page (/register)
+
+Fields: Full Name, Email, Phone (+91), Password, Role (Customer / Worker dropdown)
+If Worker → extra multi-select or text field for skills
+Success → redirect to login
+Login Page (/login)
+
+Email + Password
+“Forgot Password?” link → /forgot page (demo message: “Reset link sent”)
+Customer Dashboard (/dashboard when customer)
+
+Big button: “Use My Location” (HTML5 geolocation)
+Big button: “Show All Nearby Workers”
+Clicking either → goes to /search with lat & lon
+Worker Dashboard (/dashboard when worker)
+
+“Update Your Profile” button → /profile
+Worker Profile Edit Page (/profile)
+
+Skills (text or tags, comma-separated)
+Experience (years)
+Availability toggle (Available ON / Busy OFF)
+Latitude & Longitude fields (with link to latlong.net) or any better way that also facilitates users.
+Save button
+Search Results Page (/search?lat=xx&lon=yy)
+
+Show all AVAILABLE workers within 10 km (so always has results)
+Beautiful responsive cards (3 per row on desktop, 1 on mobile)
+Each card shows: • Worker name • Skills (e.g., “Electrician, Plumber”) • Experience & Rating (stars) • Distance (e.g., “3.4 km away”) • Big green CALL button with tel:+91xxxxxxxxxx that opens phone dialer on mobile
+Sort by ranking score (50% rating + 30% experience + 20% proximity)
+Pre-loaded Data (must run on first start):
+
+15 workers with real-looking Indian names and phones
+Must include these exact 4 numbers (client team): • Ramalakshmi – +919133145667 • Vijayalaxmi – +919347389841 • Girish – +919392165234 • Avinash – +919059387985
+Other workers have fake +9198765xxxxx numbers
+Skills from this list (random 2 per worker): Electrician, Plumber, Carpenter, Painter, AC Technician, Welder, Mason, Mobile Repair, CCTV Installation, RO Service, Pest Control, Maid, Driver, Beautician, Tailor, Cook, Gardener, etc.
+All workers have random location near Hyderabad/Delhi (17.38, 78.48 or 28.61, 77.20) so they appear in search
+Default password for all demo accounts: 123
+UI/UX Requirements:
+
+Fully mobile/desktop responsive
+Modern gradient backgrounds, card hover effects, rounded buttons
+Success/warning/info flash messages
+Font: Poppins or similar
+Colors: Primary blue (#3498db), Success green (#27ae60), gradients
+use anything that makes the websites UI outstanding and look attractive, use appropriate images for anything like background or any other when needed.
+Call Functionality:
+
+Green “Call” button must use <a href="tel:+91xxxxxxxxxx"> that opens phone dialer on mobile
+On laptop → shows the number clearly
+Extra Nice-to-Haves (if possible):
+
+Auto-capture location on customer search
+Show distance badge on cards
+Star rating display
+Hover animations on cards
+Deliverables:
+
+Complete working Flask project (app.py, models.py, config.py, templates folder, static/css)
+Runs with single command: python app.py
+Creates database + fake data automatically on first run
+100% functional, beautiful, and demo-ready for college project submission
+Make it look premium and impressive.
