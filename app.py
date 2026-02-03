@@ -5,9 +5,6 @@ from models import db, User
 import random
 import os
 from werkzeug.utils import secure_filename
-if not os.path.exists("/data"):
-    os.makedirs("/data")
-
 
 app = Flask(__name__)
 app.config.from_object(Config)
