@@ -10,16 +10,16 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <div class="collapse navbar-collapse justify-content-end" id="#navbarNav">
                 <ul class="navbar-nav align-items-center">
                     <li class="nav-item me-2">
                         <a class="nav-link" href="{{ url_for('dashboard') }}">
-                            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                            Back to Dashboard
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="btn btn-logout" href="{{ url_for('logout') }}">
-                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                            Logout
                         </a>
                     </li>
                 </ul>
@@ -29,24 +29,63 @@
     
     <div class="profile-container">
         <div class="profile-card">
-            <h1 class="profile-title"><i class="fas fa-user-edit me-2"></i>Edit Your Profile</h1>
+            <h1 class="profile-title">Edit Your Profile</h1>
             
-            <form method="POST" action="{{ url_for('profile') }}">
-                <div class="mb-3">
-                    <label for="skills" class="form-label">Your Skills</label>
-                    <input type="text" class="form-control" id="skills" name="skills" 
-                           value="{{ current_user.skills or '' }}" 
-                           placeholder="e.g., Electrician, Plumber, Carpenter">
-                    <div class="form-text">Enter your skills separated by commas</div>
+            <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data">
+                <!-- Profile Picture -->
+                <div class="text-center mb-4">
+                    <div class="avatar-preview">
+                        <div class="avatar-wrapper" id="profilePreview">
+                            {% if current_user.profile_pic %}
+                                <img src="{{ current_user.get_profile_pic_url() }}" alt="Profile" class="rounded-circle" width="160" height="160">
+                            {% else %}
+                                {{ current_user.full_name[0].upper() }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <input type="file" name="profile_pic" accept="image/*" class="form-control mt-3" id="profilePicInput">
+                    <small class="text-muted">Optional • Max 5MB • JPG, PNG, WebP</small>
                 </div>
-                
+
+                <!-- Skills Section -->
+                <div class="mb-4">
+                    <label class="form-label">Your Skills <span class="text-muted">(Select all that apply)</span></label>
+                    <div class="skills-grid">
+                        {% set default_skills = ['Electrician', 'Plumber', 'Carpenter', 'Painter', 'AC Technician', 'Welder', 'Mason', 'Mobile Repair', 'CCTV Installation', 'RO Service', 'Pest Control', 'Maid', 'Driver', 'Beautician', 'Tailor', 'Cook', 'Gardener'] %}
+                        {% for skill in default_skills %}
+                        <div class="form-check">
+                            <input class="form-check-input skill-checkbox" type="checkbox" value="{{ skill }}"
+                                   id="skill_{{ loop.index }}" {% if skill in current_user.get_skills_list() %}checked{% endif %}>
+                            <label class="form-check-label" for="skill_{{ loop.index }}">{{ skill }}</label>
+                        </div>
+                        {% endfor %}
+
+                        <!-- Other checkbox -->
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="skill_other"
+                                   {% if current_user.get_skills_list() and current_user.get_skills_list()|reject('in', default_skills)|list|length > 0 %}checked{% endif %}>
+                            <label class="form-check-label" for="skill_other">Other (specify)</label>
+                        </div>
+                    </div>
+
+                    <!-- Other skill input -->
+                    <div class="mt-3" id="otherSkillContainer" style="display: {% if current_user.get_skills_list() and current_user.get_skills_list()|reject('in', default_skills)|list|length > 0 %}block{% else %}none{% endif %};">
+                        <input type="text" class="form-control" id="otherSkillInput"
+                               value="{% for s in current_user.get_skills_list() if s not in default_skills %}{{ s }}{% endfor %}"
+                               placeholder="e.g., Appliance Repair, Locksmith">
+                    </div>
+                    <input type="hidden" name="skills" id="skillsHidden" value="">
+                    <div class="form-text">You can select multiple skills</div>
+                </div>
+
+                <!-- Rest of your form (unchanged) -->
                 <div class="mb-3">
                     <label for="experience" class="form-label">Years of Experience</label>
                     <input type="number" class="form-control" id="experience" name="experience" 
-                           value="{{ current_user.experience }}" min="0" max="50">
+                           value="{{ current_user.experience }}" min="0" max="50" required>
                 </div>
                 
-                <div class="availability-toggle">
+                <div class="availability-toggle mb-4">
                     <div class="form-check form-switch">
                         <input class="form-check-input" type="checkbox" id="is_available" name="is_available"
                                {% if current_user.is_available %}checked{% endif %}>
@@ -58,75 +97,137 @@
                     </div>
                 </div>
                 
-                <div class="mb-3">
-                    <label for="latitude" class="form-label">Latitude</label>
-                    <input type="number" step="any" class="form-control" id="latitude" name="latitude" 
-                           value="{{ current_user.latitude or '' }}" placeholder="e.g., 17.3850">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="latitude" class="form-label">Latitude</label>
+                        <input type="number" step="any" class="form-control" id="latitude" name="latitude" 
+                               value="{{ current_user.latitude or '' }}" placeholder="e.g., 17.3850">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="longitude" class="form-label">Longitude</label>
+                        <input type="number" step="any" class="form-control" id="longitude" name="longitude" 
+                               value="{{ current_user.longitude or '' }}" placeholder="e.g., 78.4867">
+                    </div>
                 </div>
                 
-                <div class="mb-3">
-                    <label for="longitude" class="form-label">Longitude</label>
-                    <input type="number" step="any" class="form-control" id="longitude" name="longitude" 
-                           value="{{ current_user.longitude or '' }}" placeholder="e.g., 78.4867">
-                    <p class="location-help">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Find your coordinates at <a href="https://www.latlong.net/" target="_blank">latlong.net</a>
-                        or click the button below to use your current location.
-                    </p>
-                </div>
+                <p class="location-help mb-3">
+                    Find your coordinates at <a href="https://www.latlong.net/" target="_blank">latlong.net</a>
+                    or use the button below
+                </p>
                 
-                <button type="button" class="btn btn-location w-100 mb-3" id="getLocationBtn">
-                    <i class="fas fa-location-crosshairs me-2"></i>
+                <button type="button" class="btn btn-location w-100 mb-4" id="getLocationBtn">
                     <span id="locationBtnText">Get My Current Location</span>
                 </button>
                 
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-save me-2"></i>Save Profile
-                </button>
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                        Save Profile
+                    </button>
+                </div>
             </form>
         </div>
     </div>
 </div>
 {% endblock %}
 
+{% block styles %}
+<style>
+    .avatar-preview {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .avatar-wrapper {
+        width: 140px;
+        height: 140px;
+        margin: 0 auto 15px auto;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #0d6efd;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        border: 5px solid white;
+    }
+    .avatar-wrapper img,
+    .avatar-wrapper .initial-letter {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+    .avatar-wrapper .initial-letter {
+        color: white;
+        font-size: 56px;
+        font-weight: bold;
+        background: #0d6efd;
+    }
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 10px; }
+    .form-check-label { cursor: pointer; font-size: 0.95rem; }
+</style>
+{% endblock %}
+
 {% block scripts %}
 <script>
+    // Profile picture preview
+    document.getElementById('profilePicInput').addEventListener('change', function(e) {
+        if (e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById('profilePreview').innerHTML = `<img src="${e.target.result}" class="rounded-circle" width="150" height="150">`;
+            };
+            reader.readAsDataURL(e.target.files[0]);
+        }
+    });
+
+    // Other skill toggle
+    document.getElementById('skill_other').addEventListener('change', function() {
+        document.getElementById('otherSkillContainer').style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Collect all selected skills on submit
+    document.querySelector('form').addEventListener('submit', function() {
+        const selected = [];
+        document.querySelectorAll('.skill-checkbox:checked').forEach(cb => {
+            if (cb.value) selected.push(cb.value.trim());
+        });
+        const otherInput = document.getElementById('otherSkillInput');
+        if (document.getElementById('skill_other').checked && otherInput.value.trim()) {
+            selected.push(otherInput.value.trim());
+        }
+        document.getElementById('skillsHidden').value = selected.join(', ');
+    });
+
+    // Your original scripts (availability + location)
     document.getElementById('is_available').addEventListener('change', function() {
-        const text = document.getElementById('availabilityText');
-        text.textContent = this.checked ? 'Available for work' : 'Currently busy';
+        document.getElementById('availabilityText').textContent = 
+            this.checked ? 'Available for work' : 'Currently busy';
     });
     
     document.getElementById('getLocationBtn').addEventListener('click', function() {
-        const btn = this;
         const btnText = document.getElementById('locationBtnText');
-        
         if ("geolocation" in navigator) {
-            btnText.innerHTML = '<span class="spinner"></span> Getting location...';
-            btn.disabled = true;
-            
+            btnText.innerHTML = 'Getting location...';
+            this.disabled = true;
             navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    document.getElementById('latitude').value = position.coords.latitude.toFixed(6);
-                    document.getElementById('longitude').value = position.coords.longitude.toFixed(6);
-                    btnText.innerHTML = '<i class="fas fa-check me-1"></i> Location Updated!';
+                pos => {
+                    document.getElementById('latitude').value = pos.coords.latitude.toFixed(6);
+                    document.getElementById('longitude').value = pos.coords.longitude.toFixed(6);
+                    btnText.innerHTML = 'Location Updated!';
                     setTimeout(() => {
                         btnText.textContent = 'Get My Current Location';
-                        btn.disabled = false;
+                        this.disabled = false;
                     }, 2000);
                 },
-                function(error) {
+                () => {
                     btnText.textContent = 'Get My Current Location';
-                    btn.disabled = false;
-                    alert('Unable to get your location. Please enter coordinates manually.');
+                    this.disabled = false;
+                    alert('Could not get location. Please enter manually.');
                 },
-                {
-                    enableHighAccuracy: true,
-                    timeout: 10000,
-                    maximumAge: 0
-                }
+                { enableHighAccuracy: true, timeout: 10000 }
             );
         } else {
-            alert('Geolocation is not supported by your browser');
+            alert('Geolocation not supported');
         }
     });
 </script>

@@ -1,11 +1,27 @@
-from flask import Flask, render_template, redirect, url_for, request, flash
+from flask import Flask, render_template, redirect, url_for, request, flash, url_for as flask_url_for
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from config import Config
 from models import db, User
 import random
+import os
+from werkzeug.utils import secure_filename
+if not os.path.exists("/data"):
+    os.makedirs("/data")
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+UPLOAD_FOLDER = 'static/profile_pics'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5MB max
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+# Make sure the upload folder exists
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 db.init_app(app)
 
@@ -125,13 +141,11 @@ def register():
         password = request.form.get('password')
         role = request.form.get('role')
         skills = request.form.get('skills', '')
-        
-        # Check if email already exists
+
         if User.query.filter_by(email=email).first():
             flash('Email already registered. Please login.', 'danger')
             return redirect(url_for('register'))
-        
-        # Create new user
+
         user = User(
             full_name=full_name,
             email=email,
@@ -140,10 +154,29 @@ def register():
             skills=skills if role == 'worker' else None
         )
         user.set_password(password)
-        
+
+        # Handle profile picture
+        if 'profile_pic' in request.files:
+            file = request.files['profile_pic']
+            if file and file.filename != '' and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                filename = f"profile_{user.id}_{filename}"  # will be renamed after commit
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                user.profile_pic = filename
+
         db.session.add(user)
         db.session.commit()
-        
+
+        # Fix filename after user has ID
+        if user.profile_pic and 'profile_' not in user.profile_pic:
+            old_path = os.path.join(app.config['UPLOAD_FOLDER'], user.profile_pic)
+            new_filename = f"profile_{user.id}_{secure_filename(file.filename)}"
+            new_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename)
+            if os.path.exists(old_path):
+                os.rename(old_path, new_path)
+            user.profile_pic = new_filename
+            db.session.commit()
+
         flash('Registration successful! Please login.', 'success')
         return redirect(url_for('login'))
     
@@ -208,18 +241,25 @@ def profile():
         current_user.skills = request.form.get('skills')
         current_user.experience = int(request.form.get('experience', 0))
         current_user.is_available = 'is_available' in request.form
-        
+    
         lat = request.form.get('latitude')
         lon = request.form.get('longitude')
-        
         if lat and lon:
             try:
                 current_user.latitude = float(lat)
                 current_user.longitude = float(lon)
             except ValueError:
-                flash('Invalid coordinates. Please enter valid numbers.', 'warning')
-                return redirect(url_for('profile'))
-        
+                flash('Invalid coordinates.', 'warning')
+
+        # Handle profile picture update
+        if 'profile_pic' in request.files:
+            file = request.files['profile_pic']
+            if file and file.filename != '' and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                filename = f"profile_{current_user.id}_{filename}"
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                current_user.profile_pic = filename
+
         db.session.commit()
         flash('Profile updated successfully!', 'success')
         return redirect(url_for('dashboard'))
@@ -232,37 +272,47 @@ def search():
     lon = request.args.get('lon', type=float)
     skill_filter = request.args.get('skill', '').strip()
     
-    # Default to Hyderabad if no coordinates provided
+    # Default to Hyderabad
     if lat is None or lon is None:
         lat, lon = 17.385, 78.486
     
-    # Get all available workers
+    # Get available workers
     workers = User.query.filter_by(role='worker', is_available=True).all()
     
-    # Filter by skill if provided
+    # Filter by skill
     if skill_filter:
-        workers = [w for w in workers if w.skills and skill_filter.lower() in w.skills.lower()]
+        workers = [w for w in workers if w.skills and skill_filter.lower() in [s.strip().lower() for s in w.skills.split(',')]]
     
-    # Calculate distance for all workers
+    # Calculate distance and filter out workers without location
     workers_with_distance = []
     for worker in workers:
         if worker.latitude and worker.longitude:
             distance = worker.distance_from(lat, lon)
             workers_with_distance.append((worker, distance))
-        else:
-            # Workers without location get a default distance
-            workers_with_distance.append((worker, None))
     
-    # Sort by ranking score (higher is better), workers with distance first
-    workers_with_distance.sort(
-        key=lambda x: (x[1] is None, -x[0].ranking_score(x[1] if x[1] is not None else 10)),
-    )
+    # Sort by distance: nearest first
+    workers_with_distance.sort(key=lambda x: x[1] if x[1] is not None else float('inf'))
     
     return render_template('search.html', 
                          workers=workers_with_distance, 
                          skill_filter=skill_filter,
                          lat=lat,
                          lon=lon)
+
+@app.route('/delete-account', methods=['POST'])
+@login_required
+def delete_account():
+    if current_user.role != 'worker':
+        flash('Only workers can delete their account.', 'danger')
+        return redirect(url_for('dashboard'))
+    
+    user_id = current_user.id
+    logout_user()
+    User.query.filter_by(id=user_id).delete()
+    db.session.commit()
+    
+    flash('Your account has been permanently deleted.', 'info')
+    return redirect(url_for('index'))
 
 # Initialize database and create demo data
 with app.app_context():

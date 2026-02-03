@@ -57,3 +57,7 @@ instance/
 
 # uv
 uv.lock
+
+.local/
+*.pyc
+instance/

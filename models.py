@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from math import radians, cos, sin, asin, sqrt
+from flask import url_for
 
 db = SQLAlchemy()
 
@@ -12,6 +13,7 @@ class User(UserMixin, db.Model):
     phone = db.Column(db.String(15), nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     role = db.Column(db.String(20), nullable=False)  # 'customer' or 'worker'
+    profile_pic = db.Column(db.String(200), nullable=True)  # stores filename like "profile_123.jpg"
     
     # Worker-specific fields
     skills = db.Column(db.String(500), nullable=True)
@@ -32,6 +34,11 @@ class User(UserMixin, db.Model):
             return [s.strip() for s in self.skills.split(',')]
         return []
     
+    def get_profile_pic_url(self):
+        if self.profile_pic:
+            return url_for('static', filename=f'profile_pics/{self.profile_pic}')
+        return None
+
     @staticmethod
     def haversine(lat1, lon1, lat2, lon2):
         """Calculate the great circle distance in kilometers between two points"""

@@ -40,15 +40,44 @@
                     <option value="worker">Worker (Providing services)</option>
                 </select>
             </div>
+
+            <!-- Profile picture -->
+            <div class="mb-3" id="profilePicContainer" style="display: none; text-align: center;">
+                <label class="form-label">Profile Picture (Optional)</label>
+                <div class="avatar-preview mb-3">
+                    <div class="avatar-large" id="previewAvatar">?</div>
+                </div>
+                <input type="file" name="profile_pic" accept="image/*" class="form-control" id="profilePicInput">
+                <div class="form-text">Upload a clear photo of yourself</div>
+            </div>
             
+            <!-- Skills Selector -->
             <div class="mb-3" id="skillsContainer" style="display: none;">
-                <label for="skills" class="form-label">Your Skills</label>
-                <input type="text" class="form-control" id="skills" name="skills" placeholder="e.g., Electrician, Plumber, Carpenter">
-                <div class="form-text">Enter skills separated by commas</div>
+                <label class="form-label">Your Skills <span class="text-muted">(Select all that apply)</span></label>
+                <div class="skills-grid">
+                    {% set skills = ['Electrician', 'Plumber', 'Carpenter', 'Painter', 'AC Technician', 'Welder', 'Mason', 'Mobile Repair', 'CCTV Installation', 'RO Service', 'Pest Control', 'Maid', 'Driver', 'Beautician', 'Tailor', 'Cook', 'Gardener'] %}
+                    {% for skill in skills %}
+                    <div class="form-check">
+                        <input class="form-check-input skill-checkbox" type="checkbox" value="{{ skill }}" id="skill_{{ loop.index }}">
+                        <label class="form-check-label" for="skill_{{ loop.index }}">{{ skill }}</label>
+                    </div>
+                    {% endfor %}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="skill_other">
+                        <label class="form-check-label" for="skill_other">Other (please specify)</label>
+                    </div>
+                </div>
+                
+                <div class="mt-3" id="otherSkillContainer" style="display: none;">
+                    <input type="text" class="form-control" id="otherSkillInput" placeholder="Enter your skill (e.g., Appliance Repair, Locksmith)">
+                </div>
+                
+                <input type="hidden" name="skills" id="skillsHidden" value="">
+                <div class="form-text">You can select multiple skills</div>
             </div>
             
             <button type="submit" class="btn btn-primary">
-                <i class="fas fa-user-plus me-2"></i>Create Account
+                Create Account
             </button>
         </form>
         
@@ -59,15 +88,77 @@
 </div>
 {% endblock %}
 
+{% block styles %}
+<style>
+    .skills-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        margin-top: 10px;
+    }
+    .form-check-label {
+        font-size: 0.95rem;
+        cursor: pointer;
+    }
+</style>
+{% endblock %}
+
 {% block scripts %}
 <script>
+    const roleSelect = document.getElementById('role');
+    const skillsContainer = document.getElementById('skillsContainer');
+    const otherCheckbox = document.getElementById('skill_other');
+    const otherInputContainer = document.getElementById('otherSkillContainer');
+    const otherInput = document.getElementById('otherSkillInput');
+    const hiddenSkills = document.getElementById('skillsHidden');
+
+    roleSelect.addEventListener('change', function() {
+        skillsContainer.style.display = this.value === 'worker' ? 'block' : 'none';
+    });
+
+    otherCheckbox.addEventListener('change', function() {
+        otherInputContainer.style.display = this.checked ? 'block' : 'none';
+        if (!this.checked) otherInput.value = '';
+    });
+
+    // Collect selected skills on submit
+    document.getElementById('registerForm').addEventListener('submit', function() {
+        const selected = [];
+        document.querySelectorAll('.skill-checkbox:checked').forEach(cb => {
+            if (cb.value && cb.id !== 'skill_other') {
+                selected.push(cb.value);
+            }
+        });
+        if (otherCheckbox.checked && otherInput.value.trim()) {
+            selected.push(otherInput.value.trim());
+        }
+        hiddenSkills.value = selected.join(', ');
+    });
+</script>
+<script>
+    // Show profile pic upload when worker is selected
     document.getElementById('role').addEventListener('change', function() {
-        const skillsContainer = document.getElementById('skillsContainer');
-        if (this.value === 'worker') {
-            skillsContainer.style.display = 'block';
-        } else {
-            skillsContainer.style.display = 'none';
+        const isWorker = this.value === 'worker';
+        document.getElementById('skillsContainer').style.display = isWorker ? 'block' : 'none';
+        document.getElementById('profilePicContainer').style.display = isWorker ? 'block' : 'none';
+    });
+
+    // Preview uploaded image
+    document.getElementById('profilePicInput')?.addEventListener('change', function(e) {
+        if (e.target.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('previewAvatar').innerHTML = `<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+            };
+            reader.readAsDataURL(e.target.files[0]);
         }
     });
 </script>
+<style>
+    .avatar-preview .avatar-large {
+        width: 100px; height: 100px; background: #007bff; color: white;
+        border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 40px; margin: 0 auto; overflow: hidden;
+    }
+</style>
 {% endblock %}
