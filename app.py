@@ -322,19 +322,12 @@ def delete_account():
 # INITIALIZE DATABASE (SAFE WAY)
 # -------------------------------------------------
 
+# Initialize database safely (run demo only once)
+# Initialize database (NO demo data in production)
 with app.app_context():
-
     db.create_all()
-
-    # Create demo data ONLY if DB is empty
-    if User.query.first() is None:
-        create_demo_data()
-
-
-# -------------------------------------------------
-# RUN (NO DEBUG IN PRODUCTION)
-# -------------------------------------------------
 
 if __name__ == '__main__':
 
+    # Do NOT use debug in production
     app.run(host='0.0.0.0', port=5000)
